@@ -1,0 +1,46 @@
+from collections import defaultdict
+
+class Solution(object):
+    def maxPoints(self, points):
+        # Custom GCD function to ensure cross-version compatibility
+        def get_gcd(a, b):
+            while b:
+                a, b = b, a % b
+            return a
+
+        n = len(points)
+        if n <= 2:
+            return n
+        
+        max_points = 0
+        
+        for i in range(n):
+            slopes = defaultdict(int)
+            x1, y1 = points[i]
+            
+            for j in range(i + 1, n):
+                x2, y2 = points[j]
+                dx = x2 - x1
+                dy = y2 - y1
+                
+                # Handling horizontal and vertical lines explicitly
+                if dx == 0:
+                    slope = (0, 1)
+                elif dy == 0:
+                    slope = (1, 0)
+                else:
+                    # Normalize signs so that identical slopes always hash to the same tuple
+                    if dx < 0:
+                        dx, dy = -dx, -dy
+                    
+                    # Reduce the fraction using our custom GCD
+                    g = get_gcd(abs(dx), abs(dy))
+                    slope = (dx // g, dy // g)
+                    
+                slopes[slope] += 1
+            
+            if slopes:
+                # Max points for the current anchor point + 1 (the anchor itself)
+                max_points = max(max_points, max(slopes.values()))
+                
+        return max_points + 1
